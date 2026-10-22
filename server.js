@@ -6,7 +6,7 @@ const uid=()=>crypto.randomBytes(6).toString("hex");
 let levels;
 function save(){fs.writeFileSync(FILE+".tmp",JSON.stringify(levels));fs.renameSync(FILE+".tmp",FILE)}
 try{levels=JSON.parse(fs.readFileSync(FILE,"utf8"))}
-catch{levels=JSON.parse(fs.readFileSync(path.join(__dirname,"seed.json"),"utf8")).map(v=>({...v,id:uid(),t:Date.now()}));save()}
+catch{levels=JSON.parse(fs.readFileSync(path.join(__dirname,"seed.json"),"utf8")).map(v=>({...v,id:uid(),t:0}));save()}
 const clean=(s,m)=>String(s||"").replace(/[\u0000-\u001f\u007f<>]/g,"").trim().slice(0,m);
 function normId(s){s=String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");return /^G\d{3}[A-Z0-9]{6}$/.test(s)?`G ${s.slice(1,4)} ${s.slice(4,7)} ${s.slice(7)}`:null}
 const hits=new Map(),MAX=5,WIN=10*60*1000;
@@ -19,7 +19,7 @@ function body(q){return new Promise((res,rej)=>{let b="";q.on("data",d=>{b+=d;if
 http.createServer(async(q,r)=>{
  const u=q.url.split("?")[0],ip=(q.headers["x-forwarded-for"]||q.socket.remoteAddress||"").split(",")[0].trim();
  try{
-  if(u==="/api/levels"&&q.method==="GET")return send(r,200,levels.map(({id,n,c,i})=>({id,n,c,i})));
+  if(u==="/api/levels"&&q.method==="GET")return send(r,200,levels.map(({id,n,c,i,t})=>({id,n,c,i,t})));
   if(u==="/api/levels"&&q.method==="POST"){
    if(limited(ip))return send(r,429,{error:"rate"});
    let j;try{j=JSON.parse(await body(q))}catch{return send(r,400,{error:"bad"})}
