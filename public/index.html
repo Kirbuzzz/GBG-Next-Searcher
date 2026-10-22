@@ -1,1 +1,182 @@
-
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Buscador de niveles · Game Builder Garage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#2a1f9e;--bg2:#1f1580;--grid:rgba(255,255,255,.07);--panel:#0e0a3a;--yel:#ffd21f;--yel2:#f0b800;--ink:#2a1f9e;--txt:#fff;--mut:#b9b3ff;--card:#1a1470;--ok:#4be39a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1470;--bg2:#120c52;--panel:#090627;--card:#150f5c}}
+:root[data-theme="dark"]{--bg:#1b1470;--bg2:#120c52;--panel:#090627;--card:#150f5c}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;color:var(--txt);font-family:"Baloo 2","Trebuchet MS",system-ui,sans-serif;font-weight:600}
+.wrap{max-width:1000px;margin:0 auto;padding:16px 14px 24px}
+.credit{text-align:center;font-size:12px;color:var(--mut);padding:0 14px 18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+h1{margin:0;font-size:clamp(20px,4.5vw,30px);font-weight:800;display:flex;align-items:center;gap:10px}
+h1 i{font-style:normal;background:var(--yel);color:var(--ink);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:22px}
+.btn{font:inherit;font-weight:800;border:0;background:var(--yel);color:var(--ink);padding:9px 22px;border-radius:999px;cursor:pointer;box-shadow:0 4px 0 var(--yel2);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--yel2)}
+.btn.ghost{background:transparent;color:var(--txt);box-shadow:inset 0 0 0 2px var(--mut)}
+.btn:focus-visible,input:focus-visible{outline:3px solid #fff;outline-offset:2px}
+#lang{font:inherit;font-weight:800;border-radius:999px;border:2px solid var(--mut);background:var(--card);color:var(--txt);padding:8px 12px;max-width:130px}
+.layout{display:grid;grid-template-columns:200px 1fr;gap:14px}
+@media(max-width:700px){.layout{grid-template-columns:1fr}}
+.side{display:flex;flex-direction:column;gap:12px}
+.new{background:var(--yel);color:var(--ink);border:6px solid #3d6bff;border-radius:50%;aspect-ratio:1;width:150px;align-self:center;display:grid;place-items:center;text-align:center;font-weight:800;font-size:18px;cursor:pointer;font-family:inherit;line-height:1.1}
+.new b{display:block;font-size:34px}
+@media(max-width:700px){.side{flex-direction:row;flex-wrap:wrap;align-items:center}.new{width:96px;font-size:13px}.new b{font-size:22px}}
+.count{background:var(--panel);border-radius:12px;padding:10px 14px;color:var(--mut);font-size:14px}
+.count strong{display:block;color:var(--txt);font-size:20px}
+.main{background:var(--panel);border-radius:22px;padding:16px;border:3px solid #3d6bff55;min-height:360px}
+.search{display:flex;gap:8px;margin-bottom:14px}
+.search input{flex:1;min-width:0;font:inherit;font-weight:800;font-size:17px;padding:11px 18px;border-radius:999px;border:3px solid var(--yel);background:var(--card);color:var(--txt)}
+.search input::placeholder{color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+.card{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;border:3px solid transparent;transition:transform .12s,border-color .12s;animation:pop .25s both}
+.card:hover,.card:focus-within{transform:scale(1.04);border-color:var(--yel)}
+@keyframes pop{from{transform:scale(.92);opacity:0}}
+.thumb{aspect-ratio:16/10;display:grid;place-items:center;font-size:44px;font-weight:800;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.25);position:relative}
+.thumb em{position:absolute;right:6px;bottom:6px;font-style:normal;font-size:11px;background:rgba(255,255,255,.85);color:var(--ink);padding:2px 8px;border-radius:99px}
+.info{padding:8px 10px 10px}
+.info h3{margin:0;font-size:16px;color:var(--yel);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info p{margin:0;font-size:13px;color:var(--mut)}
+.id{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:6px}
+.id .del{background:#ff5a6a;color:#fff}
+.id code{font:700 13px ui-monospace,monospace;background:var(--panel);padding:3px 8px;border-radius:8px}
+.id button{font:inherit;font-weight:800;font-size:12px;border:0;border-radius:99px;padding:3px 10px;cursor:pointer;background:var(--ok);color:#06331f}
+.empty{text-align:center;color:var(--mut);padding:50px 10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ok);color:#06331f;padding:9px 20px;border-radius:99px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:5}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+dialog{border:4px solid var(--yel);border-radius:20px;background:var(--panel);color:var(--txt);font-family:inherit;padding:20px;width:min(92vw,380px)}
+dialog::backdrop{background:#000a}
+dialog label{display:block;margin:10px 0 3px;color:var(--mut);font-size:14px}
+dialog input{width:100%;font:inherit;font-weight:700;padding:9px 14px;border-radius:12px;border:2px solid var(--mut);background:var(--card);color:var(--txt)}
+dialog .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.hint{font-size:12px;color:var(--mut);margin:12px 4px 0}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <header>
+  <h1><i>★</i> <span data-t="title"></span></h1>
+  <div style="display:flex;gap:8px;align-items:center"><select id="lang" aria-label="Language"></select><button class="btn ghost" id="snd" aria-pressed="true"></button></div>
+ </header>
+ <div class="layout">
+  <aside class="side">
+   <button class="new" id="add"><span><b>+</b><span data-t="add"></span></span></button>
+   <div class="count"><span data-t="saved"></span><strong id="n">0</strong></div>
+  </aside>
+  <section class="main">
+   <div class="search"><input id="q" type="search" data-tp="ph" data-ta="aria" autocomplete="off"></div>
+   <div class="grid" id="grid" aria-live="polite"></div>
+   <p class="hint" id="stat"></p>
+  </section>
+ </div>
+</div>
+<footer class="credit" data-t="credit"></footer>
+<div class="toast" id="toast"></div>
+<dialog id="dlg">
+ <h2 style="margin:0 0 4px" data-t="add2"></h2>
+ <label for="fn" data-t="name"></label><input id="fn" maxlength="40">
+ <label for="fc" data-t="creator"></label><input id="fc" maxlength="30">
+ <label for="fi" data-t="gid"></label><input id="fi" maxlength="24" placeholder="Ej: G 003 4WG NHV">
+ <div class="row"><button class="btn ghost" id="cancel" type="button" data-t="back"></button><button class="btn" id="save" type="button" data-t="save"></button></div>
+</dialog>
+<script>
+const $=s=>document.querySelector(s);
+const BASE=[];
+let user=[],data=[],sound=true,ac=null;
+try{const s=localStorage.getItem("gbg_user");user=s?JSON.parse(s):[]}catch(e){user=[]}
+data=user.concat(BASE);
+function save(){try{localStorage.setItem("gbg_user",JSON.stringify(user))}catch(e){}}
+function tone(f,d,t="square",v=.07,delay=0){
+ if(!sound)return;
+ try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+ const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+delay;
+ o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,s);g.gain.exponentialRampToValueAtTime(.001,s+d);
+ o.connect(g).connect(ac.destination);o.start(s);o.stop(s+d)}catch(e){}
+}
+const sfx={tick:()=>tone(900,.04),ok:()=>{tone(660,.08);tone(990,.14,"square",.07,.08)},back:()=>{tone(520,.08);tone(390,.12,"square",.07,.08)},hover:()=>tone(1200,.025,"sine",.04),
+ copy:()=>{tone(784,.08,"triangle",.1);tone(1047,.08,"triangle",.1,.08);tone(1319,.18,"triangle",.1,.16)}};
+const hues=[355,205,130,275,25,175,320];
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function render(){
+ const q=$("#q").value.trim().toLowerCase(),g=$("#grid");
+ const list=data.map((d,k)=>({...d,k})).filter(d=>!q||(d.n+" "+d.c+" "+d.i).toLowerCase().includes(q)||d.i.replace(/\s/g,"").toLowerCase().includes(q.replace(/\s/g,"")));
+ $("#n").textContent=data.length;
+ if(!list.length){g.innerHTML='<div class="empty">'+T("empty")+'</div>';return}
+ g.innerHTML=list.map((d,j)=>{const h=hues[[...d.i].reduce((a,ch)=>a+ch.charCodeAt(0),0)%hues.length];
+  return `<div class="card" style="animation-delay:${Math.min(j,8)*30}ms" data-k="${d.k}">
+  <div class="thumb" style="background:linear-gradient(135deg,hsl(${h} 80% 55%),hsl(${(h+50)%360} 80% 40%))">${esc(d.n.charAt(0).toUpperCase())}<em>${T("shared")}</em></div>
+  <div class="info"><h3>${esc(d.n)}</h3><p>${esc(d.c||T("nocreator"))}</p>
+  <div class="id"><code>${esc(d.i)}</code><span style="display:flex;gap:4px"><button data-copy="${d.k}">${T("copy")}</button>${canDel(d)?`<button class="del" data-del="${d.k}" aria-label="${T("del")}">×</button>`:""}</span></div></div></div>`}).join("");
+}
+$("#q").addEventListener("input",()=>{sfx.tick();render()});
+$("#grid").addEventListener("click",e=>{
+ const x=e.target.closest("[data-del]");if(x){e.stopPropagation();delLevel(+x.dataset.del);return}
+ const b=e.target.closest("[data-copy]");const c=e.target.closest(".card");
+ const k=b?b.dataset.copy:(c&&c.dataset.k);if(k==null)return;
+ const id=data[k].i;
+ (navigator.clipboard?navigator.clipboard.writeText(id):Promise.reject()).catch(()=>{}).finally(()=>{sfx.copy();toast(T("copied")+id)});
+});
+$("#grid").addEventListener("mouseover",e=>{if(e.target.closest(".card"))sfx.hover()});
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1800)}
+$("#add").onclick=()=>{sfx.ok();$("#dlg").showModal();$("#fn").focus()};
+$("#cancel").onclick=()=>{sfx.back();$("#dlg").close()};
+$("#save").onclick=()=>{
+ const n=$("#fn").value.trim(),i=$("#fi").value.trim();
+ if(!n||!i){sfx.back();toast(T("need"));return}
+ const lv={n:n.slice(0,60),c:$("#fc").value.trim().slice(0,40),i:i.slice(0,30)};addLevel(lv);
+ ["#fn","#fc","#fi"].forEach(s=>$(s).value="");
+ $("#dlg").close();sfx.ok();render();toast(T("saved2"));
+};
+$("#snd").onclick=()=>{sound=!sound;applyLang();if(sound)sfx.ok()};
+const L={
+es:{n:"Español",credit:"Idea de Kirbus",title:"Buscador de niveles",snd:"Sonido",on:"sí",off:"no",add:"Añadir<br>nivel",saved:"Niveles guardados",ph:"Busca por nombre, creador o ID…",aria:"Buscar niveles",hint:"Añade más niveles con el botón amarillo; se guardan en este navegador.",add2:"Añadir nivel",name:"Nombre",creator:"Creador (opcional)",gid:"ID de juego",back:"Atrás",save:"Guardar",empty:"No hay niveles con ese nombre.<br>Pulsa «Añadir nivel» para guardarlo.",shared:"compartido",nocreator:"Sin creador",copied:"ID copiado: ",need:"Escribe nombre e ID",saved2:"Nivel guardado"},
+en:{n:"English",credit:"Idea by Kirbus",title:"Level finder",snd:"Sound",on:"on",off:"off",add:"Add<br>level",saved:"Saved levels",ph:"Search by name, creator or ID…",aria:"Search levels",hint:"Add more levels with the yellow button; they are saved in this browser.",add2:"Add level",name:"Name",creator:"Creator (optional)",gid:"Game ID",back:"Back",save:"Save",empty:"No levels match that name.<br>Press “Add level” to save it.",shared:"shared",nocreator:"No creator",copied:"ID copied: ",need:"Enter a name and an ID",saved2:"Level saved"},
+fr:{n:"Français",credit:"Idée de Kirbus",title:"Recherche de niveaux",snd:"Son",on:"oui",off:"non",add:"Ajouter<br>un niveau",saved:"Niveaux enregistrés",ph:"Chercher par nom, créateur ou ID…",aria:"Rechercher des niveaux",hint:"Ajoutez des niveaux avec le bouton jaune ; ils sont enregistrés dans ce navigateur.",add2:"Ajouter un niveau",name:"Nom",creator:"Créateur (facultatif)",gid:"ID du jeu",back:"Retour",save:"Enregistrer",empty:"Aucun niveau avec ce nom.<br>Appuyez sur « Ajouter un niveau » pour l’enregistrer.",shared:"partagé",nocreator:"Sans créateur",copied:"ID copié : ",need:"Saisissez un nom et un ID",saved2:"Niveau enregistré"},
+de:{n:"Deutsch",credit:"Idee von Kirbus",title:"Level-Suche",snd:"Ton",on:"an",off:"aus",add:"Level<br>hinzufügen",saved:"Gespeicherte Level",ph:"Nach Name, Ersteller oder ID suchen…",aria:"Level suchen",hint:"Füge Level mit dem gelben Knopf hinzu; sie werden in diesem Browser gespeichert.",add2:"Level hinzufügen",name:"Name",creator:"Ersteller (optional)",gid:"Spiel-ID",back:"Zurück",save:"Speichern",empty:"Kein Level mit diesem Namen.<br>Tippe auf „Level hinzufügen“, um es zu speichern.",shared:"geteilt",nocreator:"Kein Ersteller",copied:"ID kopiert: ",need:"Name und ID eingeben",saved2:"Level gespeichert"},
+it:{n:"Italiano",credit:"Idea di Kirbus",title:"Cerca livelli",snd:"Suono",on:"sì",off:"no",add:"Aggiungi<br>livello",saved:"Livelli salvati",ph:"Cerca per nome, creatore o ID…",aria:"Cerca livelli",hint:"Aggiungi livelli con il pulsante giallo; vengono salvati in questo browser.",add2:"Aggiungi livello",name:"Nome",creator:"Creatore (facoltativo)",gid:"ID del gioco",back:"Indietro",save:"Salva",empty:"Nessun livello con questo nome.<br>Premi «Aggiungi livello» per salvarlo.",shared:"condiviso",nocreator:"Senza creatore",copied:"ID copiato: ",need:"Inserisci nome e ID",saved2:"Livello salvato"},
+pt:{n:"Português",credit:"Ideia de Kirbus",title:"Busca de níveis",snd:"Som",on:"sim",off:"não",add:"Adicionar<br>nível",saved:"Níveis salvos",ph:"Busque por nome, criador ou ID…",aria:"Buscar níveis",hint:"Adicione níveis com o botão amarelo; eles ficam salvos neste navegador.",add2:"Adicionar nível",name:"Nome",creator:"Criador (opcional)",gid:"ID do jogo",back:"Voltar",save:"Salvar",empty:"Nenhum nível com esse nome.<br>Toque em “Adicionar nível” para salvá-lo.",shared:"compartilhado",nocreator:"Sem criador",copied:"ID copiado: ",need:"Digite nome e ID",saved2:"Nível salvo"},
+ja:{n:"日本語",credit:"アイデア：Kirbus",title:"レベル検索",snd:"サウンド",on:"オン",off:"オフ",add:"レベルを<br>追加",saved:"保存したレベル",ph:"名前・作者・IDで検索…",aria:"レベルを検索",hint:"黄色いボタンでレベルを追加できます。このブラウザに保存されます。",add2:"レベルを追加",name:"名前",creator:"作者（任意）",gid:"ゲームID",back:"戻る",save:"保存",empty:"該当するレベルがありません。<br>「レベルを追加」で保存できます。",shared:"共有中",nocreator:"作者不明",copied:"IDをコピー: ",need:"名前とIDを入力してください",saved2:"保存しました"}
+};
+let lang="en";
+(function(){let s=null;try{s=localStorage.getItem("gbg_lang")}catch(e){}
+ if(!s||!L[s]){const c=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||"en"];for(const x of c){const p=String(x).slice(0,2).toLowerCase();if(L[p]){s=p;break}}}
+ lang=L[s]?s:"en"})();
+function T(k){return L[lang][k]??X[lang][k]}
+function applyLang(){const t=L[lang];document.documentElement.lang=lang;document.title=t.title+" · Game Builder Garage";
+ document.querySelectorAll("[data-t]").forEach(e=>e.innerHTML=t[e.dataset.t]);
+ document.querySelectorAll("[data-tp]").forEach(e=>e.placeholder=t[e.dataset.tp]);
+ document.querySelectorAll("[data-ta]").forEach(e=>e.setAttribute("aria-label",t[e.dataset.ta]));
+ $("#snd").textContent=t.snd+": "+(sound?t.on:t.off);$("#snd").setAttribute("aria-pressed",sound);
+ $("#lang").value=lang;stat();render()}
+const sel=$("#lang");sel.innerHTML=Object.keys(L).map(k=>`<option value="${k}">${L[k].n}</option>`).join("");
+sel.onchange=()=>{lang=sel.value;try{localStorage.setItem("gbg_lang",lang)}catch(e){}sfx.ok();applyLang()};
+const X={
+es:{live:"Servidor conectado: los niveles que añadas los ve todo el mundo.",loc:"Sin conexión con el servidor.",copy:"Copiar",del:"Borrar",bad:"ID no válido (formato: G 003 4WG NHV)",dup:"Ese ID ya está en la lista",rate:"Demasiados envíos, espera un poco",err:"No se pudo guardar"},
+en:{live:"Connected: levels you add are visible to everyone.",loc:"Can’t reach the server.",copy:"Copy",del:"Delete",bad:"Invalid ID (format: G 003 4WG NHV)",dup:"That ID is already listed",rate:"Too many submissions, wait a bit",err:"Couldn’t save"},
+fr:{live:"Connecté : les niveaux ajoutés sont visibles par tous.",loc:"Serveur injoignable.",copy:"Copier",del:"Supprimer",bad:"ID invalide (format : G 003 4WG NHV)",dup:"Cet ID existe déjà",rate:"Trop d’envois, patientez",err:"Échec de l’enregistrement"},
+de:{live:"Verbunden: Hinzugefügte Level sehen alle.",loc:"Server nicht erreichbar.",copy:"Kopieren",del:"Löschen",bad:"Ungültige ID (Format: G 003 4WG NHV)",dup:"Diese ID gibt es schon",rate:"Zu viele Einsendungen, kurz warten",err:"Speichern fehlgeschlagen"},
+it:{live:"Connesso: i livelli aggiunti sono visibili a tutti.",loc:"Server non raggiungibile.",copy:"Copia",del:"Elimina",bad:"ID non valido (formato: G 003 4WG NHV)",dup:"Questo ID è già in elenco",rate:"Troppi invii, attendi un po’",err:"Salvataggio non riuscito"},
+pt:{live:"Conectado: os níveis adicionados são vistos por todos.",loc:"Sem conexão com o servidor.",copy:"Copiar",del:"Excluir",bad:"ID inválido (formato: G 003 4WG NHV)",dup:"Esse ID já está na lista",rate:"Muitos envios, espere um pouco",err:"Não foi possível salvar"},
+ja:{live:"接続中：追加したレベルは全員に表示されます。",loc:"サーバーに接続できません。",copy:"コピー",del:"削除",bad:"無効なIDです（形式：G 003 4WG NHV）",dup:"このIDは登録済みです",rate:"送信が多すぎます。少し待ってください",err:"保存できませんでした"}
+};
+let shared=[],mode="loc",adminKey=(location.hash.match(/admin=([^&]+)/)||[])[1]||"";
+function rebuild(){data=shared}
+function stat(){const e=$("#stat");if(e)e.textContent=X[lang][mode]}
+function canDel(d){return !!(adminKey&&d.sid)}
+async function load(){try{const r=await fetch("/api/levels");if(!r.ok)throw 0;shared=(await r.json()).map(v=>({n:String(v.n).slice(0,60),c:String(v.c||"").slice(0,40),i:String(v.i).slice(0,30),sid:v.id}));mode="live"}catch(e){mode="loc"}rebuild();stat();render()}
+async function addLevel(lv){try{const r=await fetch("/api/levels",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lv)});if(r.ok){await load();return}const j=await r.json().catch(()=>({}));toast(T({bad:"bad",dup:"dup",rate:"rate"}[j.error]||"err"))}catch(e){toast(T("err"))}}
+async function delLevel(k){const d=data[k];if(!d||!d.sid)return;try{await fetch("/api/levels/"+d.sid,{method:"DELETE",headers:{"x-admin-key":adminKey}});sfx.back();load()}catch(e){}}
+load();setInterval(load,30000);
+applyLang();
+</script>
+</body>
+</html>
